@@ -3,6 +3,7 @@ package com.ayit.scheduled.job.admin.core.thread;
 import com.ayit.scheduled.job.admin.core.conf.XxlJobAdminConfig;
 import com.ayit.scheduled.job.admin.core.model.XxlJobInfo;
 import com.ayit.scheduled.job.admin.core.scheduler.MisfireStrategyEnum;
+import com.ayit.scheduled.job.admin.core.trigger.TriggerTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,17 +69,12 @@ public class JobScheduleHelper {
                             for (XxlJobInfo jobInfo: scheduleList) {
                                 if (nowTime > jobInfo.getTriggerNextTime() + PRE_READ_MS) {
                                     logger.warn(">>>>>>>>>>> xxl-job, schedule misfire, jobId = " + jobInfo.getId());
-                                    //既然有过期的任务，就要看看怎么处理，是直接不处理，还是其他的处理方式。这里程序默认的是什么也不做，既然过期了，就过期吧
                                     MisfireStrategyEnum misfireStrategyEnum = MisfireStrategyEnum.match(jobInfo.getMisfireStrategy(), MisfireStrategyEnum.DO_NOTHING);
-                                    //当然，这里也是再判断了一次，万一失败策略是立刻重试一次，那就立刻执行一次任务
                                     if (MisfireStrategyEnum.FIRE_ONCE_NOW == misfireStrategyEnum) {
-                                        //在这里立刻执行一次任务
                                         JobTriggerPoolHelper.trigger(jobInfo.getId(), TriggerTypeEnum.MISFIRE, -1, null, null, null);
                                         logger.debug(">>>>>>>>>>> xxl-job, schedule push trigger : jobId = " + jobInfo.getId() );
                                     }
-                                    //在这里把过期任务的下次执行时间刷新一下，放到下一次来执行
                                     refreshNextValidTime(jobInfo, new Date());
-
                                 }
                                 //这里得到的就是要执行的任务的下一次执行时间同样也小于了当前时间，但是这里和上面的不同是，没有超过当前时间加5秒的那个时间
                                 //现在大家应该都清楚了，上面加的那个5秒实际上就是调度周期，每一次处理的任务都是当前任务加5秒这个时间段内的
@@ -324,6 +320,29 @@ public class JobScheduleHelper {
         }
         logger.info(">>>>>>>>>>> xxl-job, JobScheduleHelper stop");
     }
+    private void refreshNextValidTime(XxlJobInfo jobInfo, Date fromTime) throws Exception {
+        Date nextValidTime = generateNextValidTime(jobInfo, fromTime);
+        if (nextValidTime != null) {
+            jobInfo.setTriggerLastTime(jobInfo.getTriggerNextTime());
+            jobInfo.setTriggerNextTime(nextValidTime.getTime());
+        } else {
+            jobInfo.setTriggerStatus(0);
+            jobInfo.setTriggerLastTime(0);
+            jobInfo.setTriggerNextTime(0);
+            logger.warn(">>>>>>>>>>> xxl-job, refreshNextValidTime fail for job: jobId={}, scheduleType={}, scheduleConf={}",
+                    jobInfo.getId(), jobInfo.getScheduleType(), jobInfo.getScheduleConf());
+        }
+    }
 
-
+    public static Date generateNextValidTime(XxlJobInfo jobInfo, Date fromTime) throws Exception {
+        ScheduleTypeEnum scheduleTypeEnum = ScheduleTypeEnum.match(jobInfo.getScheduleType(), null);
+        if (ScheduleTypeEnum.CRON == scheduleTypeEnum) {
+            Date nextValidTime = new CronExpression(jobInfo.getScheduleConf()).getNextValidTimeAfter(fromTime);
+            return nextValidTime;
+        }
+        else if (ScheduleTypeEnum.FIX_RATE == scheduleTypeEnum) {
+            return new Date(fromTime.getTime() + Integer.valueOf(jobInfo.getScheduleConf())*1000 );
+        }
+        return null;
+    }
 }

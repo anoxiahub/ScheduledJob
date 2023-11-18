@@ -2,10 +2,7 @@ package com.ayit.scheduled.job.admin.core.model;
 
 import java.util.Date;
 
-/**
- * @Date:2023/7/11
- * @Description:这是和日志有关的实体类，第一版本还用不到。
- */
+
 public class XxlJobLog {
 
 	//日志id
