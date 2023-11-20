@@ -1,6 +1,6 @@
 package com.ayit.scheduled.job.admin.dao;
 
-import com.cqfy.xxl.job.admin.core.model.XxlJobLogReport;
+import com.ayit.scheduled.job.admin.core.model.XxlJobLogReport;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

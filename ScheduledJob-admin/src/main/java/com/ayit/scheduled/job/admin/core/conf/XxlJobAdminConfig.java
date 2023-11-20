@@ -64,12 +64,6 @@ public class XxlJobAdminConfig implements InitializingBean, DisposableBean {
     @Value("${xxl.job.logretentiondays}")
     private int logretentiondays;
 
-    /**
-     * @author:B站UP主陈清风扬，从零带你写框架系列教程的作者，个人微信号：chenqingfengyang。
-     * @Description:系列教程目前包括手写Netty，XXL-JOB，Spring，RocketMq，Javac，JVM等课程。
-     * @Date:2023/7/1
-     * @Description:各个dao注入到这里
-     */
     @Resource
     private XxlJobLogDao xxlJobLogDao;
     @Resource
@@ -86,12 +80,6 @@ public class XxlJobAdminConfig implements InitializingBean, DisposableBean {
     @Resource
     private DataSource dataSource;
 
-    /**
-     * @author:B站UP主陈清风扬，从零带你写框架系列教程的作者，个人微信号：chenqingfengyang。
-     * @Description:系列教程目前包括手写Netty，XXL-JOB，Spring，RocketMq，Javac，JVM等课程。
-     * @Date:2023/7/1
-     * @Description:下面都是一些简单的get方法，用来得到刚才被注入的属性
-     */
     public String getI18n() {
         if (!Arrays.asList("zh_CN", "zh_TC", "en").contains(i18n)) {
             return "zh_CN";
@@ -161,4 +149,3 @@ public class XxlJobAdminConfig implements InitializingBean, DisposableBean {
 
 }
 
-}
