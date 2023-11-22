@@ -3,6 +3,7 @@ package com.ayit.scheduled.job.admin.core.trigger;
 import com.ayit.scheduled.job.admin.core.conf.XxlJobAdminConfig;
 import com.ayit.scheduled.job.admin.core.model.XxlJobGroup;
 import com.ayit.scheduled.job.admin.core.model.XxlJobInfo;
+import com.ayit.scheduled.job.admin.core.route.ExecutorRouteStrategyEnum;
 import com.ayit.scheduled.job.admin.core.scheduler.XxlJobScheduler;
 import com.ayit.scheduled.job.admin.core.util.I18nUtil;
 import com.ayit.scheduled.job.core.biz.ExecutorBiz;
@@ -53,15 +54,23 @@ public class XxlJobTrigger {
 
 
     private static void processTrigger(XxlJobGroup group, XxlJobInfo jobInfo, int finalFailRetryCount, TriggerTypeEnum triggerType, int index, int total){
+        ExecutorRouteStrategyEnum executorRouteStrategyEnum = ExecutorRouteStrategyEnum.match(jobInfo.getExecutorRouteStrategy(), null);
         TriggerParam triggerParam = new TriggerParam();
         triggerParam.setJobId(jobInfo.getId());
         triggerParam.setExecutorHandler(jobInfo.getExecutorHandler());
         triggerParam.setExecutorParams(jobInfo.getExecutorParam());
+        triggerParam.setExecutorBlockStrategy(jobInfo.getExecutorBlockStrategy());
         triggerParam.setGlueType(jobInfo.getGlueType());
         String address = null;
+        ReturnT<String> routeAddressResult = null;
         List<String> registryList = group.getRegistryList();
         if (registryList!=null && !registryList.isEmpty()) {
-            address = registryList.get(0);
+            routeAddressResult = executorRouteStrategyEnum.getRouter().route(triggerParam, registryList);
+            if (routeAddressResult.getCode() == ReturnT.SUCCESS_CODE) {
+                address = routeAddressResult.getContent();
+            } else {
+                routeAddressResult = new ReturnT<String>(ReturnT.FAIL_CODE, I18nUtil.getString("jobconf_trigger_address_empty"));
+            }
         }
         ReturnT<String> triggerResult = null;
         if (address != null) {
