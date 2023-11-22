@@ -4,13 +4,8 @@ package com.ayit.scheduled.job.core.biz.client;
 import com.ayit.scheduled.job.core.biz.ExecutorBiz;
 import com.ayit.scheduled.job.core.biz.model.ReturnT;
 import com.ayit.scheduled.job.core.biz.model.TriggerParam;
+import com.ayit.scheduled.job.core.util.XxlJobRemotingUtil;
 
-/**
- * @author:B站UP主陈清风扬，从零带你写框架系列教程的作者，个人微信号：chenqingfengyang。
- * @Description:系列教程目前包括手写Netty，XXL-JOB，Spring，RocketMq，Javac，JVM等课程。
- * @Date:2023/7/4
- * @Description:执行远程调用的客户端接口的实现类，该类会在调用中心被用到
- */
 public class ExecutorBizClient implements ExecutorBiz {
 
 
