@@ -5,11 +5,9 @@ import com.ayit.scheduled.job.admin.core.route.strategy.*;
 import com.ayit.scheduled.job.admin.core.util.I18nUtil;
 
 /**
- * @author:B站UP主陈清风扬，从零带你写框架系列教程的作者，个人微信号：chenqingfengyang。
- * @Description:系列教程目前包括手写Netty，XXL-JOB，Spring，RocketMq，Javac，JVM等课程。
- * @Date:2023/7/4
- * @Description:路由策略枚举类，第一版本中，我们只保留一个枚举对象，仅仅是为了代码不报错
- * 现在还用不到路由策略
+ * @author linq
+ * @version 1.0
+ * @date 2023/11/16 20:42
  */
 public enum ExecutorRouteStrategyEnum {
 

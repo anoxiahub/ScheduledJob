@@ -8,9 +8,9 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 /**
- * @author:B站UP主陈清风扬，从零带你写框架系列教程的作者，个人微信号：chenqingfengyang。
- * @Description:系列教程目前包括手写Netty，XXL-JOB，Spring，RocketMq，Javac，JVM等课程。
- * @Date:2023/7/3
+ * @author linq
+ * @version 1.0
+ * @date 2023/11/16 20:42
  * @Description:路由策略的抽象类，现在还用不到路由策略，所以我们暂且只引入这一个抽象类，只是为了代码不报错
  */
 public abstract class ExecutorRouter {
