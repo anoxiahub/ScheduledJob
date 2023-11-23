@@ -2,9 +2,12 @@ package com.ayit.scheduled.job.core.biz.client;
 
 
 import com.ayit.scheduled.job.core.biz.AdminBiz;
+import com.ayit.scheduled.job.core.biz.model.HandleCallbackParam;
 import com.ayit.scheduled.job.core.biz.model.RegistryParam;
 import com.ayit.scheduled.job.core.biz.model.ReturnT;
 import com.ayit.scheduled.job.core.util.XxlJobRemotingUtil;
+
+import java.util.List;
 
 public class AdminBizClient implements AdminBiz {
 
@@ -23,7 +26,10 @@ public class AdminBizClient implements AdminBiz {
     private String accessToken;
     private int timeout = 3;
 
-
+    @Override
+    public ReturnT<String> callback(List<HandleCallbackParam> callbackParamList) {
+        return XxlJobRemotingUtil.postBody(addressUrl+"api/callback", accessToken, timeout, callbackParamList, String.class);
+    }
 
     @Override
     public ReturnT<String> registry(RegistryParam registryParam) {

@@ -1,6 +1,7 @@
 package com.ayit.scheduled.job.core.biz.impl;
 
 import com.ayit.scheduled.job.core.biz.ExecutorBiz;
+import com.ayit.scheduled.job.core.biz.model.IdleBeatParam;
 import com.ayit.scheduled.job.core.biz.model.ReturnT;
 import com.ayit.scheduled.job.core.biz.model.TriggerParam;
 import com.ayit.scheduled.job.core.executor.XxlJobExecutor;
@@ -47,5 +48,15 @@ public class ExecutorBizImpl implements ExecutorBiz {
         }
         ReturnT<String> pushResult = jobThread.pushTriggerQueue(triggerParam);
         return pushResult;
+    }
+
+    @Override
+    public ReturnT<String> idleBeat(IdleBeatParam idleBeatParam) {
+        return null;
+    }
+
+    @Override
+    public ReturnT<String> beat() {
+        return null;
     }
 }

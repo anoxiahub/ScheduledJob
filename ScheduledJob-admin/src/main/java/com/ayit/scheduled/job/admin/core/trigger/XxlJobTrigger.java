@@ -3,16 +3,19 @@ package com.ayit.scheduled.job.admin.core.trigger;
 import com.ayit.scheduled.job.admin.core.conf.XxlJobAdminConfig;
 import com.ayit.scheduled.job.admin.core.model.XxlJobGroup;
 import com.ayit.scheduled.job.admin.core.model.XxlJobInfo;
+import com.ayit.scheduled.job.admin.core.model.XxlJobLog;
 import com.ayit.scheduled.job.admin.core.route.ExecutorRouteStrategyEnum;
 import com.ayit.scheduled.job.admin.core.scheduler.XxlJobScheduler;
 import com.ayit.scheduled.job.admin.core.util.I18nUtil;
 import com.ayit.scheduled.job.core.biz.ExecutorBiz;
 import com.ayit.scheduled.job.core.biz.model.ReturnT;
 import com.ayit.scheduled.job.core.biz.model.TriggerParam;
+import com.ayit.scheduled.job.core.util.IpUtil;
 import com.ayit.scheduled.job.core.util.ThrowableUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
 import java.util.List;
 
 public class XxlJobTrigger {
@@ -55,12 +58,20 @@ public class XxlJobTrigger {
 
     private static void processTrigger(XxlJobGroup group, XxlJobInfo jobInfo, int finalFailRetryCount, TriggerTypeEnum triggerType, int index, int total){
         ExecutorRouteStrategyEnum executorRouteStrategyEnum = ExecutorRouteStrategyEnum.match(jobInfo.getExecutorRouteStrategy(), null);
+        XxlJobLog jobLog = new XxlJobLog();
+        jobLog.setJobGroup(jobInfo.getJobGroup());
+        jobLog.setJobId(jobInfo.getId());
+        jobLog.setTriggerTime(new Date());
+        XxlJobAdminConfig.getAdminConfig().getXxlJobLogDao().save(jobLog);
+        logger.debug(">>>>>>>>>>> xxl-job trigger start, jobId:{}", jobLog.getId());
         TriggerParam triggerParam = new TriggerParam();
         triggerParam.setJobId(jobInfo.getId());
         triggerParam.setExecutorHandler(jobInfo.getExecutorHandler());
         triggerParam.setExecutorParams(jobInfo.getExecutorParam());
         triggerParam.setExecutorBlockStrategy(jobInfo.getExecutorBlockStrategy());
         triggerParam.setGlueType(jobInfo.getGlueType());
+        triggerParam.setLogId(jobLog.getId());
+        triggerParam.setLogDateTime(jobLog.getTriggerTime().getTime());
         String address = null;
         ReturnT<String> routeAddressResult = null;
         List<String> registryList = group.getRegistryList();
@@ -79,6 +90,34 @@ public class XxlJobTrigger {
         } else {
             triggerResult = new ReturnT<String>(ReturnT.FAIL_CODE, null);
         }
+        StringBuffer triggerMsgSb = new StringBuffer();
+        triggerMsgSb.append(I18nUtil.getString("jobconf_trigger_type")).append("：").append(triggerType.getTitle());
+        triggerMsgSb.append("<br>").append(I18nUtil.getString("jobconf_trigger_admin_adress")).append("：").append(IpUtil.getIp());
+        triggerMsgSb.append("<br>").append(I18nUtil.getString("jobconf_trigger_exe_regtype")).append("：")
+                .append( (group.getAddressType() == 0)?I18nUtil.getString("jobgroup_field_addressType_0"):I18nUtil.getString("jobgroup_field_addressType_1") );
+        triggerMsgSb.append("<br>").append(I18nUtil.getString("jobconf_trigger_exe_regaddress")).append("：").append(group.getRegistryList());
+        triggerMsgSb.append("<br>").append(I18nUtil.getString("jobinfo_field_executorRouteStrategy")).append("：").append(executorRouteStrategyEnum.getTitle());
+        //triggerMsgSb.append("<br>").append(I18nUtil.getString("jobinfo_field_executorBlockStrategy")).append("：").append(blockStrategy.getTitle());
+        triggerMsgSb.append("<br>").append(I18nUtil.getString("jobinfo_field_timeout")).append("：").append(jobInfo.getExecutorTimeout());
+        triggerMsgSb.append("<br>").append(I18nUtil.getString("jobinfo_field_executorFailRetryCount")).append("：").append(finalFailRetryCount);
+        triggerMsgSb.append("<br><br><span style=\"color:#00c0ef;\" > >>>>>>>>>>>"+ I18nUtil.getString("jobconf_trigger_run") +"<<<<<<<<<<< </span><br>")
+                .append((routeAddressResult!=null&&routeAddressResult.getMsg()!=null)?routeAddressResult.getMsg()+"<br><br>":"").append(triggerResult.getMsg()!=null?triggerResult.getMsg():"");
+        //设置执行器地址
+        jobLog.setExecutorAddress(address);
+        //设置执行定时任务的方法名称
+        jobLog.setExecutorHandler(jobInfo.getExecutorHandler());
+        //设置执行参数
+        jobLog.setExecutorParam(jobInfo.getExecutorParam());
+        //jobLog.setExecutorShardingParam(shardingParam);
+        //设置失败重试次数
+        jobLog.setExecutorFailRetryCount(finalFailRetryCount);
+        //设置触发结果码
+        jobLog.setTriggerCode(triggerResult.getCode());
+        //设置触发任务信息，也就是调度备注
+        jobLog.setTriggerMsg(triggerMsgSb.toString());
+        //更新数据库信息
+        XxlJobAdminConfig.getAdminConfig().getXxlJobLogDao().updateTriggerInfo(jobLog);
+        logger.debug(">>>>>>>>>>> xxl-job trigger end, jobId:{}", jobLog.getId());
     }
 
 
