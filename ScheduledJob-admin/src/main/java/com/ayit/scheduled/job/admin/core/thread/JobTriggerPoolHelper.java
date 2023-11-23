@@ -97,13 +97,6 @@ public class JobTriggerPoolHelper {
         });
     }
 
-    /**
-     * @author:B站UP主陈清风扬，从零带你写框架系列教程的作者，个人微信号：chenqingfengyang。
-     * @Description:系列教程目前包括手写Netty，XXL-JOB，Spring，RocketMq，Javac，JVM等课程。
-     * @Date:2023/7/3
-     * @Description:静态成员变量，说明该变量也只会初始化一次，并且根据修饰符来看，该成员变量也不会直接对外暴露
-     * 而是通过下面的两个方法间接在外部调用
-     */
     private static JobTriggerPoolHelper helper = new JobTriggerPoolHelper();
 
     //启动方法

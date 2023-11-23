@@ -131,15 +131,9 @@ public class JobRegistryHelper {
 		registryOrRemoveThreadPool.execute(new Runnable() {
 			@Override
 			public void run() {
-				//这里的意思也很简单，就是先根据registryParam参数去数据库中更新相应的数据
-				//如果返回的是0，说明数据库中没有相应的信息，该执行器还没注册到注册中心呢，所以下面
-				//就可以直接新增这一条数据即可
 				int ret = XxlJobAdminConfig.getAdminConfig().getXxlJobRegistryDao().registryUpdate(registryParam.getRegistryGroup(), registryParam.getRegistryKey(), registryParam.getRegistryValue(), new Date());
 				if (ret < 1) {
-					//这里就是数据库中没有相应数据，直接新增即可
 					XxlJobAdminConfig.getAdminConfig().getXxlJobRegistryDao().registrySave(registryParam.getRegistryGroup(), registryParam.getRegistryKey(), registryParam.getRegistryValue(), new Date());
-					//该方法从名字上看是刷新注册表信息的意思
-					//但是作者还没有实现，源码中就是空的，所以这里我就照搬过来了
 					freshGroupRegistryInfo(registryParam);
 				}
 			}
@@ -151,6 +145,27 @@ public class JobRegistryHelper {
 	}
 
 
-
+	public ReturnT<String> registryRemove(RegistryParam registryParam) {
+		//校验处理
+		if (!StringUtils.hasText(registryParam.getRegistryGroup())
+				|| !StringUtils.hasText(registryParam.getRegistryKey())
+				|| !StringUtils.hasText(registryParam.getRegistryValue())) {
+			return new ReturnT<String>(ReturnT.FAIL_CODE, "Illegal Argument.");
+		}
+		//将任务提交给线程池来处理
+		registryOrRemoveThreadPool.execute(new Runnable() {
+			@Override
+			public void run() {
+				//在这里直接根据registryParam从数据库中删除对应的执行器地址
+				//这里的返回结果是删除了几条数据的意思
+				int ret = XxlJobAdminConfig.getAdminConfig().getXxlJobRegistryDao().registryDelete(registryParam.getRegistryGroup(), registryParam.getRegistryKey(), registryParam.getRegistryValue());
+				if (ret > 0) {
+					//上个方法已经讲过了，这里就不再讲了
+					freshGroupRegistryInfo(registryParam);
+				}
+			}
+		});
+		return ReturnT.SUCCESS;
+	}
 
 }

@@ -8,7 +8,6 @@ import com.ayit.scheduled.job.core.executor.XxlJobExecutor;
 import com.ayit.scheduled.job.core.glue.GlueTypeEnum;
 import com.ayit.scheduled.job.core.handler.IJobHandler;
 import com.ayit.scheduled.job.core.thread.JobThread;
-import com.sun.org.apache.bcel.internal.generic.NEW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

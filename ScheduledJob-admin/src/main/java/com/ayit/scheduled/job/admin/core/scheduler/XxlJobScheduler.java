@@ -1,11 +1,14 @@
 package com.ayit.scheduled.job.admin.core.scheduler;
 
 import com.ayit.scheduled.job.admin.core.conf.XxlJobAdminConfig;
+import com.ayit.scheduled.job.admin.core.thread.JobCompleteHelper;
 import com.ayit.scheduled.job.admin.core.thread.JobRegistryHelper;
 import com.ayit.scheduled.job.admin.core.thread.JobScheduleHelper;
 import com.ayit.scheduled.job.admin.core.thread.JobTriggerPoolHelper;
+import com.ayit.scheduled.job.admin.core.util.I18nUtil;
 import com.ayit.scheduled.job.core.biz.ExecutorBiz;
 import com.ayit.scheduled.job.core.biz.client.ExecutorBizClient;
+import com.ayit.scheduled.job.core.enums.ExecutorBlockStrategyEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,14 +27,21 @@ public class XxlJobScheduler {
     private static final Logger logger = LoggerFactory.getLogger(XxlJobScheduler.class);
 
     public void init() throws Exception {
+        initI18n();
         JobTriggerPoolHelper.toStart();
         JobRegistryHelper.getInstance().start();
+        JobCompleteHelper.getInstance().start();
         JobScheduleHelper.getInstance().start();
     }
-
+    private void initI18n(){
+        for (ExecutorBlockStrategyEnum item: ExecutorBlockStrategyEnum.values()) {
+            item.setTitle(I18nUtil.getString("jobconf_block_".concat(item.name())));
+        }
+    }
     public void destroy() throws Exception {
 
         JobScheduleHelper.getInstance().toStop();
+        JobCompleteHelper.getInstance().toStop();
         JobRegistryHelper.getInstance().toStop();
         JobTriggerPoolHelper.toStop();
 
